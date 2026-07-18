@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "RePrompt for ChatGPT",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Restores the pencil edit button on your sent ChatGPT messages.",
   "icons": {
     "16": "assets/icon-16.png",
