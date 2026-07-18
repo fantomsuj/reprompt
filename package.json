@@ -7,6 +7,7 @@
     "typecheck": "tsc --project tsconfig.json --noEmit",
     "build": "node scripts/build.mjs",
     "demo:render": "node scripts/render-demo.mjs",
+    "store:assets": "node scripts/render-store-assets.mjs",
     "test": "npm run build && vitest run",
     "package": "npm run build && node scripts/package.mjs",
     "package:verify": "node scripts/verify-package.mjs",

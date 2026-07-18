@@ -62,6 +62,8 @@ RePrompt requests no optional permissions. Its only host access is `https://chat
 
 The extension does not send network requests, use analytics, call ChatGPT APIs, read conversations into extension storage, or transmit message content. All DOM handling stays in the current ChatGPT tab.
 
+See the full [Privacy Policy](PRIVACY.md).
+
 ## License
 
 RePrompt is available under the [MIT License](LICENSE).
