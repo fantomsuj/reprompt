@@ -182,7 +182,7 @@
 
       showNotice("ChatGPT did not expose an edit action for this message.");
     } catch (error) {
-      console.warn("[PromptPencil] Could not open message editor", error);
+      console.warn("[RePrompt] Could not open message editor", error);
       showNotice("Could not open the editor. Refresh ChatGPT and try again.");
     } finally {
       delete trigger.dataset.busy;
