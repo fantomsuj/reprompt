@@ -1,4 +1,4 @@
-# PromptPencil
+# RePrompt
 
 A small Chrome extension that restores the classic pencil action on messages you send at `chatgpt.com`.
 
