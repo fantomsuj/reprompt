@@ -1,0 +1,19 @@
+{
+  "name": "reprompt-for-chatgpt",
+  "version": "1.1.0",
+  "private": true,
+  "description": "A focused Chrome extension that restores ChatGPT's native message edit action.",
+  "scripts": {
+    "typecheck": "tsc --project tsconfig.json --noEmit",
+    "build": "node scripts/build.mjs",
+    "test": "npm run build && vitest run",
+    "package": "npm run build && node scripts/package.mjs",
+    "package:verify": "node scripts/verify-package.mjs",
+    "check": "npm run typecheck && npm test && npm run package && npm run package:verify"
+  },
+  "devDependencies": {
+    "jsdom": "^26.1.0",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  }
+}
