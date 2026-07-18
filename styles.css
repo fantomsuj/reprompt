@@ -1,4 +1,4 @@
-.cge-edit-button {
+.reprompt-edit-button {
   position: relative;
   display: inline-flex;
   width: 30px;
@@ -20,35 +20,35 @@
     background-color 120ms ease-out;
 }
 
-.cge-edit-button svg {
+.reprompt-edit-button svg {
   width: 18px;
   height: 18px;
   fill: currentColor;
 }
 
-.cge-turn:hover .cge-edit-button,
-.cge-turn:focus-within .cge-edit-button,
-.cge-edit-button:focus-visible {
+.reprompt-turn:hover .reprompt-edit-button,
+.reprompt-turn:focus-within .reprompt-edit-button,
+.reprompt-edit-button:focus-visible {
   opacity: 1;
   transform: translateY(0);
   pointer-events: auto;
 }
 
-.cge-edit-button:hover {
+.reprompt-edit-button:hover {
   color: var(--text-primary, #202020);
   background: var(--main-surface-secondary, rgba(0, 0, 0, 0.055));
 }
 
-.cge-edit-button:active {
+.reprompt-edit-button:active {
   transform: scale(0.94);
 }
 
-.cge-edit-button:focus-visible {
+.reprompt-edit-button:focus-visible {
   outline: 2px solid var(--text-primary, #202020);
   outline-offset: 2px;
 }
 
-.cge-edit-button::after {
+.reprompt-edit-button::after {
   position: absolute;
   inset-block-start: calc(100% + 7px);
   inset-inline-start: 50%;
@@ -70,28 +70,25 @@
     transform 140ms ease-out 320ms;
 }
 
-.cge-edit-button:hover::after,
-.cge-edit-button:focus-visible::after {
+.reprompt-edit-button:hover::after,
+.reprompt-edit-button:focus-visible::after {
   opacity: 1;
   transform: translate(-50%, 0);
 }
 
-[data-chatgpt-native-edit] {
-  position: absolute !important;
-  width: 1px !important;
-  height: 1px !important;
-  overflow: hidden !important;
-  clip: rect(0 0 0 0) !important;
-  clip-path: inset(50%) !important;
-  white-space: nowrap !important;
+.reprompt-edit-button[aria-busy="true"] {
+  cursor: progress;
+  opacity: 0.65;
 }
 
-.cge-turn:has(textarea) .cge-edit-button,
-.cge-turn:has([contenteditable="true"]) .cge-edit-button {
+.reprompt-turn:has(textarea) .reprompt-edit-button,
+.reprompt-turn:has([contenteditable="true"]) .reprompt-edit-button,
+.reprompt-turn:has(textarea) [data-reprompt-native-edit],
+.reprompt-turn:has([contenteditable="true"]) [data-reprompt-native-edit] {
   display: none;
 }
 
-.cge-notice {
+.reprompt-notice {
   position: fixed;
   z-index: 2147483647;
   inset-inline-start: 50%;
@@ -111,21 +108,23 @@
     transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.cge-notice--visible {
+.reprompt-notice--visible {
   opacity: 1;
   transform: translate(-50%, 0);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .cge-edit-button,
-  .cge-edit-button::after,
-  .cge-notice {
+  .reprompt-edit-button,
+  .reprompt-edit-button::after,
+  .reprompt-notice {
     transition: none;
   }
 }
 
 @media (hover: none) {
-  .cge-edit-button {
+  .reprompt-edit-button {
+    width: 44px;
+    height: 44px;
     opacity: 1;
     transform: none;
     pointer-events: auto;
