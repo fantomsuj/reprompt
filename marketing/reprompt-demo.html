@@ -1,0 +1,668 @@
+<!doctype html>
+<html lang="en" data-reprompt-test>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>RePrompt demo capture</title>
+    <link rel="stylesheet" href="../styles.css" />
+    <style>
+      :root {
+        color-scheme: light;
+        --text-primary: #171717;
+        --text-secondary: #676767;
+        --main-surface-primary: #fff;
+        --main-surface-secondary: rgba(0, 0, 0, 0.055);
+        --border-light: rgba(0, 0, 0, 0.1);
+        --sidebar: #f9f9f9;
+        --message: #f4f4f4;
+        --camera-scale: 1;
+        --edit-opacity: 0;
+        --edit-scale: .82;
+      }
+
+      * { box-sizing: border-box; }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+        background: #fff;
+        color: var(--text-primary);
+        font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-kerning: normal;
+      }
+
+      button,
+      textarea { font: inherit; }
+
+      button { cursor: default; }
+
+      .camera {
+        width: 1280px;
+        height: 720px;
+        overflow: hidden;
+        background: #fff;
+        transform: scale(var(--camera-scale));
+        transform-origin: 87% 37%;
+      }
+
+      .app {
+        display: grid;
+        width: 100%;
+        height: 100%;
+        grid-template-columns: 260px 1fr;
+      }
+
+      aside {
+        position: relative;
+        padding: 10px 12px 14px;
+        background: var(--sidebar);
+        color: #303030;
+      }
+
+      .sidebar-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 2px 2px 8px 8px;
+      }
+
+      .openai-mark {
+        display: grid;
+        width: 30px;
+        height: 30px;
+        place-items: center;
+        color: #202020;
+      }
+
+      .openai-mark svg { width: 24px; height: 24px; }
+
+      .square-button,
+      .header-icon {
+        display: grid;
+        width: 34px;
+        height: 34px;
+        padding: 0;
+        place-items: center;
+        border: 0;
+        border-radius: 9px;
+        background: transparent;
+        color: #343434;
+      }
+
+      .square-button svg,
+      .header-icon svg,
+      .nav-item svg,
+      .composer-icon svg {
+        width: 19px;
+        height: 19px;
+        fill: none;
+        stroke: currentColor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 1.75;
+      }
+
+      .nav-item {
+        display: flex;
+        height: 40px;
+        align-items: center;
+        gap: 12px;
+        padding: 0 10px;
+        border-radius: 9px;
+        color: #303030;
+        font-size: 14px;
+        font-weight: 450;
+      }
+
+      .nav-item:hover,
+      .square-button:hover { background: #ececec; }
+
+      .history-label {
+        margin: 26px 10px 5px;
+        color: #747474;
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      .history-item {
+        overflow: hidden;
+        padding: 9px 10px;
+        border-radius: 9px;
+        color: #383838;
+        font-size: 14px;
+        line-height: 20px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .history-item.active { background: #ececec; }
+
+      .sidebar-footer {
+        position: absolute;
+        right: 12px;
+        bottom: 13px;
+        left: 12px;
+      }
+
+      .upgrade {
+        display: flex;
+        min-height: 50px;
+        align-items: center;
+        gap: 11px;
+        padding: 6px 9px;
+        border-radius: 10px;
+        font-size: 13.5px;
+      }
+
+      .upgrade-mark {
+        display: grid;
+        width: 30px;
+        height: 30px;
+        flex: 0 0 auto;
+        place-items: center;
+        border: 1px solid #dedede;
+        border-radius: 50%;
+        background: #fff;
+      }
+
+      .upgrade small {
+        display: block;
+        margin-top: 1px;
+        color: #7b7b7b;
+        font-size: 11.5px;
+      }
+
+      main {
+        position: relative;
+        min-width: 0;
+        overflow: hidden;
+        background: #fff;
+      }
+
+      header {
+        position: absolute;
+        z-index: 3;
+        top: 0;
+        right: 0;
+        left: 0;
+        display: flex;
+        height: 58px;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 16px 0 20px;
+      }
+
+      .model {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        color: #303030;
+        font-size: 18px;
+        font-weight: 600;
+        letter-spacing: -.025em;
+      }
+
+      .model svg { width: 14px; height: 14px; fill: currentColor; }
+
+      .top-actions {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .share {
+        display: flex;
+        height: 36px;
+        align-items: center;
+        gap: 7px;
+        padding: 0 12px;
+        border: 0;
+        border-radius: 9px;
+        background: transparent;
+        color: #333;
+        font-size: 14px;
+        font-weight: 500;
+      }
+
+      .share:hover,
+      .header-icon:hover { background: #f2f2f2; }
+
+      .share svg {
+        width: 17px;
+        height: 17px;
+        fill: none;
+        stroke: currentColor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 1.8;
+      }
+
+      .state-label {
+        position: absolute;
+        z-index: 4;
+        top: 72px;
+        right: 28px;
+        display: flex;
+        height: 27px;
+        align-items: center;
+        gap: 7px;
+        padding: 0 10px;
+        border: 1px solid #e7e7e7;
+        border-radius: 7px;
+        background: rgba(255, 255, 255, .94);
+        color: #5d5d5d;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, .035);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: .015em;
+        opacity: var(--label-opacity, 1);
+      }
+
+      .state-label-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--label-dot, #9b9b9b);
+      }
+
+      .conversation {
+        width: 720px;
+        margin: 0 auto;
+        padding-top: 145px;
+      }
+
+      article {
+        position: relative;
+        min-height: 126px;
+      }
+
+      [data-message-author-role="user"] {
+        width: fit-content;
+        max-width: 600px;
+        margin-left: auto;
+        padding: 10px 16px;
+        border-radius: 22px;
+        background: var(--message);
+        color: #202020;
+        font-size: 16px;
+        line-height: 24px;
+      }
+
+      .actions {
+        display: flex;
+        height: 32px;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 1px;
+        margin-top: 5px;
+        padding-right: 1px;
+      }
+
+      .actions > button,
+      .actions > span > button {
+        display: inline-grid;
+        width: 30px;
+        height: 30px;
+        padding: 0;
+        place-items: center;
+        border: 0;
+        border-radius: 8px;
+        background: transparent;
+        color: #666;
+      }
+
+      .actions > button:hover,
+      .actions > span > button:hover { background: rgba(0, 0, 0, .055); color: #202020; }
+
+      .actions svg { width: 18px; height: 18px; fill: currentColor; }
+
+      .actions [data-reprompt-native-edit] {
+        opacity: var(--edit-opacity);
+        transform: scale(var(--edit-scale));
+        transform-origin: center;
+      }
+
+      .overflow-store { display: none; }
+
+      .assistant-row {
+        max-width: 660px;
+        margin-top: 30px;
+        color: #292929;
+        font-size: 16px;
+        line-height: 25px;
+      }
+
+      .assistant-row p { margin: 0 0 12px; }
+
+      .assistant-row strong { font-weight: 650; }
+
+      .composer-wrap {
+        position: absolute;
+        right: 0;
+        bottom: 12px;
+        left: 0;
+        display: grid;
+        place-items: center;
+      }
+
+      .composer {
+        position: relative;
+        width: 768px;
+        height: 104px;
+        padding: 16px 18px;
+        border: 1px solid #dedede;
+        border-radius: 28px;
+        background: #fff;
+        color: #7a7a7a;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, .045);
+        font-size: 16px;
+      }
+
+      .composer-tools {
+        position: absolute;
+        right: 10px;
+        bottom: 9px;
+        left: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .composer-left { display: flex; align-items: center; gap: 2px; }
+
+      .composer-icon {
+        display: grid;
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        place-items: center;
+        border: 0;
+        border-radius: 50%;
+        background: transparent;
+        color: #303030;
+      }
+
+      .tools-copy { color: #555; font-size: 14px; }
+
+      .voice-button { background: #f2f2f2; }
+
+      .editor {
+        width: 600px;
+        margin-left: auto;
+        padding: 13px 13px 10px 16px;
+        border-radius: 22px;
+        background: var(--message);
+      }
+
+      .editor textarea {
+        display: block;
+        width: 100%;
+        height: 63px;
+        resize: none;
+        border: 0;
+        outline: 0;
+        background: transparent;
+        color: #202020;
+        font-size: 16px;
+        line-height: 24px;
+      }
+
+      .editor-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 5px;
+      }
+
+      .editor-footer button {
+        height: 32px;
+        padding: 0 14px;
+        border: 1px solid #d4d4d4;
+        border-radius: 999px;
+        background: #fff;
+        color: #282828;
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      .editor-footer .send {
+        border-color: #202020;
+        background: #202020;
+        color: #fff;
+      }
+
+      .cursor {
+        position: fixed;
+        z-index: 100;
+        display: none;
+        width: 24px;
+        height: 30px;
+        filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .25));
+        pointer-events: none;
+        transform: translate(-3px, -2px);
+      }
+
+      .cursor.visible { display: block; }
+      .cursor svg { width: 100%; height: 100%; }
+
+      .click-ring {
+        position: fixed;
+        z-index: 99;
+        display: none;
+        width: 32px;
+        height: 32px;
+        border: 2px solid rgba(35, 35, 35, .28);
+        border-radius: 50%;
+        pointer-events: none;
+        transform: scale(var(--ring-scale, .72));
+        opacity: var(--ring-opacity, 0);
+      }
+
+      body.clicking .click-ring { display: block; }
+
+      body.show-tooltip [data-reprompt-native-edit] button {
+        background: rgba(0, 0, 0, .06);
+        color: #202020;
+      }
+
+      .demo-tooltip {
+        position: fixed;
+        z-index: 98;
+        display: none;
+        padding: 6px 8px;
+        border-radius: 7px;
+        background: #303030;
+        color: #f7f7f7;
+        box-shadow: 0 2px 7px rgba(0, 0, 0, .14);
+        font-size: 12px;
+        font-weight: 500;
+        line-height: 16px;
+        pointer-events: none;
+      }
+
+      body.show-tooltip .demo-tooltip { display: block; }
+    </style>
+  </head>
+  <body>
+    <div class="camera">
+      <div class="app">
+        <aside>
+          <div class="sidebar-top">
+            <span class="openai-mark" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12.1 2.2a5.1 5.1 0 0 1 4.8 3.2 5.1 5.1 0 0 1 3.6 7.9 5.1 5.1 0 0 1-4.8 6.8 5.1 5.1 0 0 1-8.3-1.1 5.1 5.1 0 0 1-3.6-7.9A5.1 5.1 0 0 1 8.6 4.3a5 5 0 0 1 3.5-2.1Zm4.1 4.6-4.1 2.4-4.2-2.4v4.8l4.2 2.4 4.1-2.4V6.8Zm-9.7.8a3.4 3.4 0 0 0-1.2 4.7l.1.2v4.7l4.2 2.4a3.4 3.4 0 0 0 4.7-1.2l.1-.2-4.1-2.4v-4.7L6.5 8.9V7.6Zm11 5.2L13.4 15v4.8a3.4 3.4 0 0 0 4.7-1.2 3.4 3.4 0 0 0-.6-5.8Z" fill="currentColor"/></svg>
+            </span>
+            <button class="square-button" aria-label="Close sidebar"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4zM9 5v14"/></svg></button>
+          </div>
+          <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg>New chat</div>
+          <div class="nav-item"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m16.3 16.3 4.2 4.2"/></svg>Search chats</div>
+          <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4zM9 9h6M9 13h6"/></svg>Library</div>
+          <div class="history-label">Chats</div>
+          <div class="history-item active">Plan a weekend in Kyoto</div>
+          <div class="history-item">Neighborhood coffee guide</div>
+          <div class="history-item">Packing list for Japan</div>
+          <div class="sidebar-footer">
+            <div class="upgrade"><span class="upgrade-mark">↑</span><span>Upgrade plan<small>More access to advanced models</small></span></div>
+          </div>
+        </aside>
+
+        <main>
+          <header>
+            <div class="model">ChatGPT <svg viewBox="0 0 16 16"><path d="m4 6 4 4 4-4"/></svg></div>
+            <div class="top-actions">
+              <button class="share"><svg viewBox="0 0 24 24"><path d="M12 16V4m0 0L8 8m4-4 4 4M5 12v7h14v-7"/></svg>Share</button>
+              <button class="header-icon" aria-label="More"><svg viewBox="0 0 24 24"><path d="M6 12h.01M12 12h.01M18 12h.01" stroke-width="3"/></svg></button>
+            </div>
+          </header>
+
+          <div class="state-label"><span class="state-label-dot"></span><span class="state-label-copy">Before</span></div>
+
+          <div class="conversation">
+            <article data-testid="conversation-turn-1">
+              <div data-message-author-role="user">Plan a three-day weekend in Kyoto, focused on food and quiet neighborhoods.</div>
+              <div class="actions">
+                <button aria-label="More actions" title="More actions">
+                  <svg viewBox="0 0 24 24"><path d="M5 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z"/></svg>
+                </button>
+                <button aria-label="Copy" title="Copy">
+                  <svg viewBox="0 0 24 24"><path d="M8 7V5a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3h-2v3a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3v-9a3 3 0 0 1 3-3h3Zm2 0h4a3 3 0 0 1 3 3v4h2a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1h-8a1 1 0 0 0-1 1v2Zm-5 2a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1H5Z"/></svg>
+                </button>
+                <div class="overflow-store">
+                  <span><button aria-label="Edit message" title="Edit message">
+                    <svg viewBox="0 0 24 24"><path fill-rule="evenodd" d="M13.3 4.3a4.54 4.54 0 0 1 6.4 6.4l-8.1 8.1a5 5 0 0 1-2.7 1.4l-4.7.8a1 1 0 0 1-1.2-1.2l.8-4.7a5 5 0 0 1 1.4-2.7l8.1-8.1ZM13 7.4l-6.4 6.4a3 3 0 0 0-.8 1.6l-.6 3.4 3.4-.6a3 3 0 0 0 1.6-.8l6.4-6.4L13 7.4Zm5 2.2L14.4 6l.3-.3a2.54 2.54 0 0 1 3.6 3.6l-.3.3Z"/></svg>
+                  </button></span>
+                </div>
+              </div>
+            </article>
+            <div class="assistant-row">
+              <p><strong>Here’s a relaxed three-day route</strong> that balances Kyoto’s best food with quieter streets.</p>
+              <p>Start around Gion early, then spend the afternoon exploring the small cafés and shops north of the crowds.</p>
+            </div>
+          </div>
+
+          <div class="composer-wrap">
+            <div class="composer">
+              Ask anything
+              <div class="composer-tools">
+                <div class="composer-left">
+                  <button class="composer-icon" aria-label="Add"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+                  <span class="tools-copy">Tools</span>
+                </div>
+                <button class="composer-icon voice-button" aria-label="Voice"><svg viewBox="0 0 24 24"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z"/><path d="M5 11v1a7 7 0 0 0 14 0v-1M12 19v3"/></svg></button>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <div class="click-ring"></div>
+    <div class="demo-tooltip">Edit message</div>
+    <div class="cursor" aria-hidden="true">
+      <svg viewBox="0 0 28 34"><path d="M2.3 1.8 24.7 19c1.2.9.5 2.8-1 2.8h-8.1l-4.3 9.1c-.6 1.3-2.5 1.2-3-.1L1 4C.6 2.4 1.2 1 2.3 1.8Z" fill="#fff" stroke="#111" stroke-width="2" stroke-linejoin="round"/></svg>
+    </div>
+
+    <script>
+      (() => {
+        const body = document.body;
+        const root = document.documentElement;
+        const cursor = document.querySelector(".cursor");
+        const ring = document.querySelector(".click-ring");
+        const tooltip = document.querySelector(".demo-tooltip");
+        const label = document.querySelector(".state-label-copy");
+        const edit = document.querySelector('[aria-label="Edit message"]');
+        const message = document.querySelector('[data-message-author-role="user"]');
+        let extensionPromise;
+        let editorOpen = false;
+
+        const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
+        const mix = (from, to, progress) => from + (to - from) * progress;
+        const easeOutQuint = (progress) => 1 - Math.pow(1 - clamp(progress), 5);
+
+        edit.addEventListener("click", () => {
+          if (editorOpen) return;
+          editorOpen = true;
+          message.outerHTML = `
+            <div class="editor">
+              <textarea>Plan a three-day weekend in Kyoto, focused on food, quiet neighborhoods, and bookstores.</textarea>
+              <div class="editor-footer"><button>Cancel</button><button class="send">Send</button></div>
+            </div>`;
+        });
+
+        function loadExtension() {
+          if (extensionPromise) return extensionPromise;
+          extensionPromise = new Promise((resolve, reject) => {
+            const script = document.createElement("script");
+            script.src = "../dist/unpacked/content.js";
+            script.onload = () => requestAnimationFrame(() => requestAnimationFrame(resolve));
+            script.onerror = reject;
+            document.head.append(script);
+          });
+          return extensionPromise;
+        }
+
+        async function renderDemoFrame(frame) {
+          const time = frame / 30;
+          if (time >= .95) await loadExtension();
+
+          body.classList.remove("show-tooltip", "clicking");
+
+          const zoom = easeOutQuint((time - .55) / .4);
+          root.style.setProperty("--camera-scale", mix(1, 1.16, zoom).toFixed(5));
+
+          const reveal = easeOutQuint((time - .95) / .25);
+          root.style.setProperty("--edit-opacity", reveal.toFixed(4));
+          root.style.setProperty("--edit-scale", mix(.82, 1, reveal).toFixed(4));
+
+          const labelFade = time < 1.075
+            ? mix(1, 0, clamp((time - .95) / .125))
+            : mix(0, 1, clamp((time - 1.075) / .125));
+          label.textContent = time < 1.075 ? "Before" : "With RePrompt";
+          root.style.setProperty("--label-opacity", labelFade.toFixed(4));
+          root.style.setProperty("--label-dot", time < 1.075 ? "#9b9b9b" : "#4d9b70");
+
+          cursor.classList.toggle("visible", time >= 1.2 && time < 2);
+          if (time >= 1.2 && time < 2) {
+            const target = edit.getBoundingClientRect();
+            const move = easeOutQuint((time - 1.2) / .6);
+            const targetX = target.left + target.width * .52;
+            const targetY = target.top + target.height * .48;
+            const x = mix(1215, targetX, move);
+            const y = mix(445, targetY, move);
+            cursor.style.left = `${x}px`;
+            cursor.style.top = `${y}px`;
+            ring.style.left = `${targetX - 16}px`;
+            ring.style.top = `${targetY - 16}px`;
+            tooltip.style.left = `${target.left + target.width / 2 - 37}px`;
+            tooltip.style.top = `${target.bottom + 8}px`;
+          }
+
+          if (time >= 1.5 && time < 2) body.classList.add("show-tooltip");
+
+          if (time >= 1.8 && time < 2) {
+            body.classList.add("clicking");
+            const click = clamp((time - 1.8) / .2);
+            root.style.setProperty("--ring-opacity", Math.sin(click * Math.PI).toFixed(4));
+            root.style.setProperty("--ring-scale", mix(.72, 1.15, easeOutQuint(click)).toFixed(4));
+          }
+
+          if (time >= 2 && !editorOpen) edit.click();
+          window.__DEMO_FRAME__ = frame;
+          window.__DEMO_READY__ = true;
+          return {
+            frame,
+            editorOpen,
+            extensionLoaded: Boolean(extensionPromise),
+            editBeforeCopy: edit.parentElement.nextElementSibling?.matches?.('[aria-label="Copy"]') === true
+          };
+        }
+
+        window.renderDemoFrame = renderDemoFrame;
+        const initialFrame = Number(new URLSearchParams(location.search).get("frame") || 0);
+        renderDemoFrame(initialFrame);
+      })();
+    </script>
+  </body>
+</html>

@@ -4,6 +4,22 @@ RePrompt is a small Chrome extension that restores the pencil action on messages
 
 ## Install
 
+### Set up with Codex or Claude Code
+
+After cloning or downloading this repository, open the project folder in Codex or Claude Code and paste this prompt:
+
+```text
+I downloaded the RePrompt repository and opened it in this coding agent. Please set it up as a local Chrome extension for me.
+
+Inspect the repository instructions, confirm that Node.js 22 or newer is available, install the dependencies with `npm ci`, and build the extension with `npm run build`. Verify that the finished extension contains both `dist/unpacked/manifest.json` and `dist/unpacked/content.js`.
+
+Then help me install it in Chrome. If you can control Chrome, open `chrome://extensions`, turn on Developer mode, click Load unpacked, and select this repository's `dist/unpacked/` folder. If you cannot control Chrome's Extensions page, give me the absolute path to `dist/unpacked/` and concise instructions for completing those clicks myself.
+
+Finally, have me refresh any open `chatgpt.com` tab and verify that hovering over one of my messages shows the pencil immediately before Copy. Do not change the extension's source code unless a setup or build error requires a fix; if anything fails, diagnose it and rerun the failed step.
+```
+
+The coding agent can install dependencies, build the extension, and verify the output. Loading an unpacked extension is completed manually in Chrome because Chrome requires you to select the extension directory through its Extensions page.
+
 ### From a local build
 
 1. Run `npm ci` and `npm run build`.
